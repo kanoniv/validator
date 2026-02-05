@@ -4,6 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/kanoniv.svg)](https://crates.io/crates/kanoniv)
+[![CI](https://github.com/kanoniv/validator/actions/workflows/ci.yml/badge.svg)](https://github.com/kanoniv/validator/actions/workflows/ci.yml)
 
 ---
 
