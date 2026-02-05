@@ -1,4 +1,4 @@
-pub mod validate;
 pub mod compile;
-pub mod hash;
 pub mod diff;
+pub mod hash;
+pub mod validate;

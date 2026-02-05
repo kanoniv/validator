@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::Path;
 
@@ -9,34 +9,33 @@ pub fn run(file: &Path, output: Option<&Path>) -> Result<()> {
     // Read file
     let content = fs::read_to_string(file)
         .with_context(|| format!("Failed to read file: {}", file.display()))?;
-    
+
     // Parse YAML
-    let spec = parser::parse_yaml(&content)
-        .with_context(|| "Failed to parse YAML")?;
-    
+    let spec = parser::parse_yaml(&content).with_context(|| "Failed to parse YAML")?;
+
     // Compile to IR
     let ir = compile_to_ir(&spec)?;
-    
+
     // Compute plan hash
     let canonical_json = serde_json::to_string(&ir)?;
     let mut hasher = Sha256::new();
     hasher.update(canonical_json.as_bytes());
     let hash = format!("sha256:{:x}", hasher.finalize());
-    
+
     // Add hash to IR
     let mut ir_with_hash = ir;
     ir_with_hash["plan_hash"] = serde_json::Value::String(hash);
-    
+
     // Output
     let output_json = serde_json::to_string_pretty(&ir_with_hash)?;
-    
+
     if let Some(output_path) = output {
         fs::write(output_path, &output_json)?;
         println!("Compiled to: {}", output_path.display());
     } else {
         println!("{}", output_json);
     }
-    
+
     Ok(())
 }
 
@@ -61,6 +60,6 @@ fn compile_to_ir(spec: &serde_json::Value) -> Result<serde_json::Value> {
         "blocking_strategy": spec.get("blocking").and_then(|b| b.get("strategy")),
         "thresholds": spec.get("decision").and_then(|d| d.get("thresholds")),
     });
-    
+
     Ok(ir)
 }

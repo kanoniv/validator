@@ -10,11 +10,10 @@ pub fn run(file: &Path, format: &str) -> Result<()> {
     // Read file
     let content = fs::read_to_string(file)
         .with_context(|| format!("Failed to read file: {}", file.display()))?;
-    
+
     // Parse YAML
-    let spec = parser::parse_yaml(&content)
-        .with_context(|| "Failed to parse YAML")?;
-    
+    let spec = parser::parse_yaml(&content).with_context(|| "Failed to parse YAML")?;
+
     // Validate schema
     let schema_errors = validator::validate_schema(&spec)?;
     if !schema_errors.is_empty() {
@@ -28,11 +27,11 @@ pub fn run(file: &Path, format: &str) -> Result<()> {
         }
         return Err(anyhow::anyhow!("{} schema error(s)", schema_errors.len()));
     }
-    
+
     if format == "text" {
         println!("{} Schema valid", "✓".green().bold());
     }
-    
+
     // Validate semantics
     let semantic_errors = validator::validate_semantics(&spec)?;
     if !semantic_errors.is_empty() {
@@ -44,15 +43,18 @@ pub fn run(file: &Path, format: &str) -> Result<()> {
                 eprintln!("  {} {}", "→".red(), error);
             }
         }
-        return Err(anyhow::anyhow!("{} semantic error(s)", semantic_errors.len()));
+        return Err(anyhow::anyhow!(
+            "{} semantic error(s)",
+            semantic_errors.len()
+        ));
     }
-    
+
     if format == "text" {
         println!("{} Semantic checks passed", "✓".green().bold());
         println!("{} {} is valid", "✓".green().bold(), file.display());
     } else {
         println!(r#"{{"valid": true, "errors": []}}"#);
     }
-    
+
     Ok(())
 }
