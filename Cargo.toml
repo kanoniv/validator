@@ -26,6 +26,10 @@ assert_cmd = "2"
 predicates = "3"
 tempfile = "3"
 
+[lib]
+name = "kanoniv_core"
+path = "src/lib.rs"
+
 [[bin]]
 name = "kanoniv"
 path = "src/main.rs"

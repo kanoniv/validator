@@ -39,7 +39,9 @@ pub fn run(file: &Path, output: Option<&Path>) -> Result<()> {
     Ok(())
 }
 
-fn compile_to_ir(spec: &serde_json::Value) -> Result<serde_json::Value> {
+pub fn compile_to_ir(spec: &serde_json::Value) -> Result<serde_json::Value> {
+    use sha2::{Digest, Sha256};
+
     // Basic IR compilation - extracts key fields and normalizes structure
     let ir = serde_json::json!({
         "api_version": spec.get("api_version"),
@@ -61,5 +63,14 @@ fn compile_to_ir(spec: &serde_json::Value) -> Result<serde_json::Value> {
         "thresholds": spec.get("decision").and_then(|d| d.get("thresholds")),
     });
 
-    Ok(ir)
+    // Compute plan hash
+    let canonical_json = serde_json::to_string(&ir)?;
+    let mut hasher = Sha256::new();
+    hasher.update(canonical_json.as_bytes());
+    let hash = format!("sha256:{:x}", hasher.finalize());
+
+    let mut ir_with_hash = ir;
+    ir_with_hash["plan_hash"] = serde_json::Value::String(hash);
+
+    Ok(ir_with_hash)
 }
